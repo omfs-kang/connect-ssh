@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implant AI Research Lab - 테스트 서버</title>
+    <style>
+        :root { --bg-color: #f5f5f7; --card-bg: #ffffff; --text-main: #1d1d1f; --text-sub: #86868b; --accent: #0071e3; --success: #34c759; --error: #ff3b30; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 600px; padding: 20px; box-sizing: border-box; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 8px 0; color: var(--accent); }
+        .header p { font-size: 16px; color: var(--text-sub); margin: 0; }
+        .card { background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04); margin-bottom: 20px; transition: transform 0.2s ease; }
+        .card:hover { transform: translateY(-2px); }
+        .section-title { font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #e5e5ea; padding-bottom: 10px; }
+        .status-item { display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 12px; margin-bottom: 12px; background-color: #fbfbfd; font-size: 15px; font-weight: 500; }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .badge-success { background-color: #e2f6ea; color: #137333; }
+        .badge-error { background-color: #fce8e6; color: #c5221f; }
+        .db-data-box { background: #f5f5f7; border-left: 4px solid var(--accent); padding: 15px; border-radius: 0 12px 12px 0; font-size: 14px; color: #333; line-height: 1.6; margin-top: 15px; }
+        .footer { text-align: center; font-size: 12px; color: var(--text-sub); margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>implant.ai.kr</h1>
+        <p>강원장의 고속 호스팅 연구소</p>
+    </div>
+
+    <div class="card">
+        <div class="section-title">천리길도 한 걸음 부터</div>
+        
+        <div class="status-item">
+            <span>Apache 웹서버 가동 및 외부망 접속</span>
+            <span class="status-badge badge-success">연결 완료</span>
+        </div>
+
+        <div class="status-item">
+            <span>🧬 PHP 가상 머신 환경</span>
+            <span class="status-badge badge-success">정상</span>
+        </div>
+
+        <?php
+        $host = 'db';
+        $user = 'root';
+        $pass = 'root';
+        $dbname = 'orsay';
+
+        // 오류 메시지 숨기고 수동 제어
+        $conn = @new mysqli($host, $user, $pass, $dbname);
+
+        if ($conn->connect_error) {
+            echo '
+            <div class="status-item">
+                <span>MySQL 데이터베이스 컨테이너</span>
+                <span class="status-badge badge-error">통신 실패</span>
+            </div>
+            <div class="db-data-box" style="border-left-color: var(--error);">
+                <b>에러 로그:</b> ' . htmlspecialchars($conn->connect_error) . '<br>
+                docker-compose의 DB 상태나 비밀번호 설정을 확인하세요.
+            </div>';
+        } else {
+            echo '
+            <div class="status-item">
+                <span>MySQL 데이터베이스 컨테이너</span>
+                <span class="status-badge badge-success">통신 성공</span>
+            </div>';
+
+            // 데이터 쿼리 테스트
+            $sql = "SELECT project_name, status, updated_at FROM ai_test_log WHERE id = 1";
+            $result = $conn->query($sql);
+            
+            if ($result && $row = $result->fetch_assoc()) {
+                echo '
+                <div class="db-data-box">
+                    <b>데이터베이스 연동 테스트 창</b><br>
+                    • 초고속 통신: ' . htmlspecialchars($row['project_name']) . '<br>
+                    • 현재 상태: <b>' . htmlspecialchars($row['status']) . '</b><br>
+                    • 데이터 동기화 시간: ' . htmlspecialchars($row['updated_at']) . '
+                </div>';
+            } else {
+                echo '
+                <div class="db-data-box" style="border-left-color: var(--error);">
+                    ⚠️ DB 연결은 성공했으나, 샘플 테이블 데이터(SQL 초기화 파일)를 찾을 수 없습니다.
+                </div>';
+            }
+            $conn->close();
+        }
+        ?>
+    </div>
+
+    <div class="footer">
+        &copy; 2026 High-Speed AI based hosting Research & Co.
+    </div>
+</div>
+
+</body>
+</html>

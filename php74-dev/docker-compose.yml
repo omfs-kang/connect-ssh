@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: orsay-apache-web
+    restart: always  # 연탄맥이 켜지면 도ker 웹서버도 자동 실행되도록 설정
+    ports:
+      - "80:80"      # 외부 정식 HTTP 포트 개방
+      - "443:443"    # 나중에 SSL(HTTPS) 인증서 적용을 위해 미리 개방
+    depends_on:
+      - db
+    volumes:
+      - ../html74:/var/www/html
+    networks:
+      - legacy_net
+
+  db:
+    image: mysql:5.7
+    container_name: orsay-mysql-db
+    restart: always  # DB도 24시간 자동 생존하도록 설정
+    environment:
+      MYSQL_ROOT_PASSWORD: root  # 기존 패스워드 유지
+      MYSQL_DATABASE: orsay
+    volumes:
+      - ../initdb74:/docker-entrypoint-initdb.d
+      - db-data:/var/lib/mysql   # 데이터 유실 방지를 위한 볼륨 영구 저장 설정 추가
+    command: --max_allowed_packet=128M
+    ports:
+      - "3306:3306"  # 표준 MySQL 포트로 외부 GUI 툴 접속 허용
+    networks:
+      - legacy_net
+
+networks:
+  legacy_net:
+
+volumes:
+  db-data:  # DB 데이터가 컨테이너 삭제 시에도 안전하게 보존되는 가상 저장소

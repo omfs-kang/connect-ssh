@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# 주소창에서 .html 확장자 강제로 숨기기
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^([^\.]+)/?$ $1.html [NC,L]

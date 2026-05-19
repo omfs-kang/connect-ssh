@@ -1,0 +1,10 @@
+FROM php:7.4-apache
+
+# 실전 서버를 위한 대한민국 타임존 설정 추가
+ENV TZ=Asia/Seoul
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN docker-php-ext-install mysqli
+RUN echo 'AddType application/x-httpd-php .php .html' >> /etc/apache2/apache2.conf
+RUN rm -f /var/www/html/index.html
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
